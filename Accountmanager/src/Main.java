@@ -18,9 +18,10 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception
     {
 
-        JDBCController controller = new JDBCController();
-        controller.insertProjectMaterial(1,20,1);
 
+
+        JDBCController controller = new JDBCController();
+        controller.removeProjectMaterial(1,2,1);
 
 
 
