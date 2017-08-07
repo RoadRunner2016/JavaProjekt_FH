@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<?import javafx.scene.control.TextField?>
+<VBox prefHeight="686.0" prefWidth="1189.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="StorageController.ProjectController">
+    <children>
+        <MenuBar VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Datei">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Neu Projekt"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Projekt öffnen"/>
+                        <MenuItem mnemonicParsing="false" text="Proekt Speichern"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Einstellungen"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Beenden"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Undo"/>
+                        <MenuItem mnemonicParsing="false" text="Redo"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Cut"/>
+                        <MenuItem mnemonicParsing="false" text="Copy"/>
+                        <MenuItem mnemonicParsing="false" text="Paste"/>
+                        <MenuItem mnemonicParsing="false" text="Delete"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" text="Select All"/>
+                        <MenuItem mnemonicParsing="false" text="Unselect All"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Hinzufügen">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Neues Projekt"/>
+                        <MenuItem mnemonicParsing="false" text="Neuer Mitarbeiter"/>
+                        <MenuItem mnemonicParsing="false" text="Neue Materialien"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Hilfe">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Impressum"/>
+                        <MenuItem mnemonicParsing="false" text="Hilfe"/>
+                        <MenuItem mnemonicParsing="false" text="Kontakt"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <SplitPane dividerPositions="0.540016849199663" prefHeight="836.0" prefWidth="1118.0">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                    <children>
+                        <Label alignment="CENTER" style="&#10;" text="Drag components from Library here…"
+                               textAlignment="CENTER" textFill="#9f9f9f" wrapText="false">
+                            <font>
+                                <Font size="18.0"/>
+                            </font>
+                        </Label>
+                        <TabPane prefHeight="662.0" prefWidth="969.0" tabClosingPolicy="UNAVAILABLE"
+                                 AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                 AnchorPane.topAnchor="0.0">
+                            <tabs>
+                                <Tab text="Projekte">
+                                    <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                            <children>
+                                                <TableView fx:id="projects" prefHeight="635.0" prefWidth="969.0"
+                                                           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <columns>
+                                                        <TableColumn fx:id="projectID" prefWidth="75.0" text="ID"/>
+                                                        <TableColumn fx:id="projectName" prefWidth="75.0" text="Name"/>
+                                                        <TableColumn fx:id="projectStart" prefWidth="75.0"
+                                                                     text="Start"/>
+                                                        <TableColumn fx:id="projectEnd" prefWidth="75.0" text="Ende"/>
+                                                        <TableColumn fx:id="projectAdvisor" prefWidth="75.0"
+                                                                     text="Bearbeitung"/>
+                                                    </columns>
+                                                </TableView>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Übersicht">
+                                    <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                            <children>
+                                                <ScrollPane prefHeight="200.0" prefWidth="200.0"
+                                                            style="-fx-fit-to-width: true;"
+                                                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <content>
+                                                        <GridPane alignment="CENTER" prefHeight="402.0"
+                                                                  prefWidth="611.0" style="-fx-padding: 25;"
+                                                                  translateY="-20.0">
+                                                            <columnConstraints>
+                                                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"
+                                                                                   prefWidth="100.0"/>
+                                                                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"
+                                                                                   prefWidth="100.0"/>
+                                                            </columnConstraints>
+                                                            <rowConstraints>
+                                                                <RowConstraints maxHeight="220.0" minHeight="220.0"
+                                                                                prefHeight="220.0" vgrow="SOMETIMES"/>
+                                                                <RowConstraints maxHeight="1.7976931348623157E308"
+                                                                                valignment="TOP" vgrow="ALWAYS"/>
+                                                                <RowConstraints maxHeight="1.7976931348623157E308"
+                                                                                valignment="TOP"/>
+                                                                <RowConstraints maxHeight="1.7976931348623157E308"
+                                                                                valignment="TOP" vgrow="ALWAYS"/>
+                                                            </rowConstraints>
+                                                            <children>
+                                                                <AnchorPane prefHeight="232.0" prefWidth="306.0">
+                                                                    <children>
+                                                                        <ImageView fitHeight="179.0" fitWidth="298.0"
+                                                                                   layoutX="34.0" layoutY="21.0"
+                                                                                   pickOnBounds="true"
+                                                                                   preserveRatio="true">
+                                                                            <image>
+                                                                            </image>
+                                                                        </ImageView>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="65.0" prefWidth="306.0"
+                                                                            GridPane.rowIndex="1">
+                                                                    <children>
+                                                                        <Label layoutX="33.0" layoutY="25.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Meilensteine">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.columnIndex="1"
+                                                                            GridPane.rowIndex="1">
+                                                                    <children>
+                                                                        <Text fx:id="overviewMilestones" layoutX="14.0"
+                                                                              layoutY="36.0" strokeType="OUTSIDE"
+                                                                              strokeWidth="0.0"
+                                                                              text="kein Projekt gewählt"
+                                                                              wrappingWidth="244.99609375">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Text>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.rowIndex="2">
+                                                                    <children>
+                                                                        <Label layoutX="33.0" layoutY="25.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Mitarbeiter">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.columnIndex="1"
+                                                                            GridPane.rowIndex="2">
+                                                                    <children>
+                                                                        <Text fx:id="overviewEmployees" layoutX="14.0"
+                                                                              layoutY="36.0" strokeType="OUTSIDE"
+                                                                              strokeWidth="0.0"
+                                                                              text="kein Projekt gewählt"
+                                                                              wrappingWidth="244.99609375">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Text>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.columnIndex="1">
+                                                                    <children>
+                                                                        <Label layoutX="14.0" layoutY="28.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Projektname">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <Label layoutX="14.0" layoutY="88.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Gesamtkosten">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <Label layoutX="14.0" layoutY="147.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Laufzeit">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <Label fx:id="overviewProjectName"
+                                                                               layoutX="14.0" layoutY="52.0"
+                                                                               prefHeight="25.0" prefWidth="274.0"
+                                                                               text="BeispielName">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <Label fx:id="overviewCosts" layoutX="14.0"
+                                                                               layoutY="113.0" prefHeight="25.0"
+                                                                               prefWidth="279.0" text="10,000.00 €">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                        <Label fx:id="overviewStartEnd" layoutX="14.0"
+                                                                               layoutY="168.0" prefHeight="25.0"
+                                                                               prefWidth="185.0"
+                                                                               text="01.01.1990 - 02.05.1999">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.rowIndex="3">
+                                                                    <children>
+                                                                        <Label layoutX="33.0" layoutY="25.0"
+                                                                               prefHeight="25.0" prefWidth="120.0"
+                                                                               text="Material">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                            GridPane.columnIndex="1"
+                                                                            GridPane.rowIndex="3">
+                                                                    <children>
+                                                                        <Text fx:id="overviewMaterial" layoutX="14.0"
+                                                                              layoutY="36.0" strokeType="OUTSIDE"
+                                                                              strokeWidth="0.0"
+                                                                              text="kein Projekt gewählt"
+                                                                              wrappingWidth="244.99609375">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Text>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            </children>
+                                                        </GridPane>
+                                                    </content>
+                                                </ScrollPane>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Personal">
+                                    <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                            <children>
+                                                <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           prefWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           percentWidth="10.0" prefWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           prefWidth="100.0"/>
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints maxHeight="107.0" minHeight="0.0"
+                                                                        prefHeight="59.0" vgrow="SOMETIMES"/>
+                                                        <RowConstraints maxHeight="194.0" minHeight="0.0"
+                                                                        prefHeight="37.0" vgrow="SOMETIMES"/>
+                                                        <RowConstraints maxHeight="534.0" minHeight="10.0"
+                                                                        prefHeight="527.0" vgrow="SOMETIMES"/>
+                                                    </rowConstraints>
+                                                    <children>
+                                                        <TableView fx:id="staffInvolved" prefHeight="200.0"
+                                                                   prefWidth="200.0" GridPane.rowIndex="2">
+                                                            <columns>
+                                                                <TableColumn fx:id="staffInvolvedID" prefWidth="75.0"
+                                                                             text="ID"/>
+                                                                <TableColumn fx:id="staffInvolvedLastname"
+                                                                             prefWidth="75.0" text="Name"/>
+                                                                <TableColumn fx:id="staffInvolvedFirstname"
+                                                                             prefWidth="75.0" text="Vorname"/>
+                                                            </columns>
+                                                        </TableView>
+                                                        <TableView fx:id="staffAll" prefHeight="200.0" prefWidth="200.0"
+                                                                   GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                                            <columns>
+                                                                <TableColumn fx:id="staffAllID" prefWidth="75.0"
+                                                                             text="ID"/>
+                                                                <TableColumn fx:id="staffAllLastname" prefWidth="75.0"
+                                                                             text="Name"/>
+                                                                <TableColumn fx:id="staffAllFirstname" prefWidth="75.0"
+                                                                             text="Vorname"/>
+                                                                <TableColumn fx:id="staffAllProject" prefWidth="75.0"
+                                                                             text="Projekt"/>
+                                                            </columns>
+                                                        </TableView>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                            <children>
+                                                                <Button fx:id="employeeRemoveFromProj" layoutX="7.0"
+                                                                        layoutY="180.0" mnemonicParsing="false"
+                                                                        text="&gt;&gt;" AnchorPane.leftAnchor="7.0"
+                                                                        AnchorPane.rightAnchor="7.0"/>
+                                                                <Button fx:id="employeeAddToProj" layoutX="7.0"
+                                                                        layoutY="146.0" mnemonicParsing="false"
+                                                                        text="&lt;&lt;" AnchorPane.leftAnchor="7.0"
+                                                                        AnchorPane.rightAnchor="7.0"/>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.rowIndex="1">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="7.0" prefHeight="25.0"
+                                                                       prefWidth="185.0" text="Mitarbeiter im Projekt">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="18.0" prefWidth="299.0">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="11.0" prefHeight="25.0"
+                                                                       prefWidth="192.0"
+                                                                       text="Mitarbeiterkosten pro Tag:">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                                <Label fx:id="employeeCosts0" layoutX="14.0"
+                                                                       layoutY="36.0" prefHeight="25.0"
+                                                                       prefWidth="194.0" text="10,000.00 $">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="2">
+                                                            <children>
+                                                                <AnchorPane layoutX="-3.0" prefHeight="18.0"
+                                                                            prefWidth="299.0">
+                                                                    <children>
+                                                                        <Label layoutX="14.0" layoutY="11.0"
+                                                                               prefHeight="25.0" prefWidth="192.0"
+                                                                               text="Gesamtmitarbeiterkosten:">
+                                                                            <font>
+                                                                                <Font size="16.0"/>
+                                                                            </font>
+                                                                        </Label>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                                <Label fx:id="employeeCosts1" layoutX="14.0"
+                                                                       layoutY="36.0" prefHeight="25.0"
+                                                                       prefWidth="182.0" text="10,000.00 $">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="7.0" prefHeight="25.0"
+                                                                       prefWidth="185.0" text="Andere Mitarbeiter">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </children>
+                                                </GridPane>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Material">
+                                    <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                            <children>
+                                                <GridPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                          AnchorPane.rightAnchor="-0.0" AnchorPane.topAnchor="0.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           prefWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           percentWidth="10.0" prefWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           prefWidth="100.0"/>
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints maxHeight="107.0" minHeight="0.0"
+                                                                        prefHeight="25.0" vgrow="SOMETIMES"/>
+                                                        <RowConstraints maxHeight="194.0" minHeight="0.0"
+                                                                        prefHeight="28.0" vgrow="SOMETIMES"/>
+                                                        <RowConstraints maxHeight="534.0" minHeight="10.0"
+                                                                        prefHeight="527.0" vgrow="SOMETIMES"/>
+                                                    </rowConstraints>
+                                                    <children>
+                                                        <TableView fx:id="materialUsed" prefHeight="200.0"
+                                                                   prefWidth="200.0" GridPane.rowIndex="2">
+                                                            <columns>
+                                                                <TableColumn fx:id="usedMaterialName"
+                                                                             prefWidth="105.00003051757812"
+                                                                             text="Bezeichnung"/>
+                                                                <TableColumn fx:id="usedMaterialPrice" prefWidth="86.0"
+                                                                             text="Einzelpreis"/>
+                                                                <TableColumn fx:id="usedMaterialAmount" prefWidth="79.0"
+                                                                             text="Menge"/>
+                                                            </columns>
+                                                        </TableView>
+                                                        <TableView fx:id="materialAll" prefHeight="200.0"
+                                                                   prefWidth="200.0" GridPane.columnIndex="2"
+                                                                   GridPane.rowIndex="2">
+                                                            <columns>
+                                                                <TableColumn fx:id="materialAllName" prefWidth="144.0"
+                                                                             text="Bezeichnung"/>
+                                                                <TableColumn fx:id="materialAllPrice" minWidth="0.0"
+                                                                             prefWidth="153.0" text="Einzelpreis"/>
+                                                            </columns>
+                                                        </TableView>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                                            <children>
+                                                                <Button fx:id="materialRemoveFromProj" layoutX="7.0"
+                                                                        layoutY="180.0" mnemonicParsing="false"
+                                                                        text="&gt;&gt;" AnchorPane.leftAnchor="7.0"
+                                                                        AnchorPane.rightAnchor="7.0"/>
+                                                                <Button fx:id="materialAddToProj" layoutX="7.0"
+                                                                        layoutY="146.0" mnemonicParsing="false"
+                                                                        text="&lt;&lt;" AnchorPane.leftAnchor="7.0"
+                                                                        AnchorPane.rightAnchor="7.0"/>
+                                                                <TextField fx:id="materialAddAmount" layoutX="-41.0"
+                                                                           layoutY="111.0" text="0"
+                                                                           AnchorPane.leftAnchor="7.0"
+                                                                           AnchorPane.rightAnchor="7.0"/>
+                                                                <TextField fx:id="materialRemoveAmount" layoutX="7.0"
+                                                                           layoutY="213.0" text="0"
+                                                                           AnchorPane.leftAnchor="7.0"
+                                                                           AnchorPane.rightAnchor="7.0"/>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.rowIndex="1">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="12.0" prefHeight="25.0"
+                                                                       prefWidth="185.0" text="genutztes Material">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="18.0" prefWidth="299.0">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="11.0" prefHeight="25.0"
+                                                                       prefWidth="192.0" text="Materialkosten:">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                                <Label fx:id="materialCosts" layoutX="126.0"
+                                                                       layoutY="11.0" prefHeight="25.0"
+                                                                       prefWidth="150.0" text="10,000.00 $">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="2"/>
+                                                        <AnchorPane prefHeight="200.0" prefWidth="200.0"
+                                                                    GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                            <children>
+                                                                <Label layoutX="14.0" layoutY="12.0" prefHeight="25.0"
+                                                                       prefWidth="185.0" text="verfügbares Material">
+                                                                    <font>
+                                                                        <Font size="16.0"/>
+                                                                    </font>
+                                                                </Label>
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </children>
+                                                </GridPane>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                                <Tab text="Meilensteine">
+                                    <content>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                            <children>
+                                                <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0"
+                                                            style="-fx-fit-to-width: true;"
+                                                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+                                                    <content>
+                                                        <GridPane fx:id="milstonesGridPane" gridLinesVisible="true"
+                                                                  maxHeight="1.7976931348623157E308"
+                                                                  maxWidth="1.7976931348623157E308" prefHeight="382.0"
+                                                                  prefWidth="437.0">
+                                                            <columnConstraints>
+                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                                   percentWidth="100.0"
+                                                                                   prefWidth="100.0"/>
+                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                                   percentWidth="10.0"
+                                                                                   prefWidth="100.0"/>
+                                                            </columnConstraints>
+                                                            <rowConstraints>
+                                                                <RowConstraints minHeight="10.0" prefHeight="30.0"
+                                                                                vgrow="SOMETIMES"/>
+                                                            </rowConstraints>
+                                                        </GridPane>
+                                                    </content>
+                                                </ScrollPane>
+                                                <Button fx:id="milestonesAddOne" mnemonicParsing="false"
+                                                        prefHeight="30.0" prefWidth="100.0" text="Hinzufügen"
+                                                        AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="10.0"/>
+                                                <Button fx:id="milestonesDeleteAll" layoutX="10.0" layoutY="10.0"
+                                                        mnemonicParsing="false" prefHeight="30.0" prefWidth="100.0"
+                                                        text="Alle Entfernen" AnchorPane.leftAnchor="110.0"
+                                                        AnchorPane.topAnchor="10.0"/>
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </Tab>
+                            </tabs>
+                        </TabPane>
+                    </children>
+                </AnchorPane>
+                <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                    <children>
+                        <SplitPane fx:id="msganch" dividerPositions="0.7051671732522796" orientation="VERTICAL"
+                                   prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                    <children>
+                                        <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0"
+                                                    style="-fx-fit-to-width: true;" AnchorPane.bottomAnchor="0.0"
+                                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                    AnchorPane.topAnchor="0.0">
+                                            <content>
+                                                <GridPane fx:id="messageGridPane" gridLinesVisible="true"
+                                                          maxHeight="1.7976931348623157E308"
+                                                          maxWidth="1.7976931348623157E308" prefHeight="382.0"
+                                                          prefWidth="437.0">
+                                                    <columnConstraints>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           percentWidth="38.0" prefWidth="100.0"/>
+                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"
+                                                                           percentWidth="62.0" prefWidth="100.0"/>
+                                                    </columnConstraints>
+                                                    <rowConstraints>
+                                                        <RowConstraints minHeight="10.0" prefHeight="30.0"
+                                                                        vgrow="SOMETIMES"/>
+                                                    </rowConstraints>
+                                                </GridPane>
+                                            </content>
+                                        </ScrollPane>
+                                    </children>
+                                </AnchorPane>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="200.0">
+                                    <children>
+                                        <TextArea layoutY="80.0" prefHeight="140.0" prefWidth="485.0"
+                                                  AnchorPane.bottomAnchor="50.0" AnchorPane.leftAnchor="0.0"
+                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                                        <Button layoutY="144.0" mnemonicParsing="false" prefHeight="52.0"
+                                                prefWidth="485.0" text="Senden" AnchorPane.bottomAnchor="0.0"
+                                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+                                    </children>
+                                </AnchorPane>
+                            </items>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </children>
+</VBox>
