@@ -15,16 +15,13 @@ public class Main extends Application {
         Application.launch(args);
     }
 
-    public void start(Stage primaryStage) throws Exception {
-
-
-        primaryStage.setTitle("Hauptbildschirm");
-        LoginWindow mainWindow = new LoginWindow();
-        mainWindow.start(primaryStage);
-
-        ObservableList<Project> listProjecttmp = FXCollections.observableArrayList();
+    public void start(Stage primaryStage) throws Exception
+    {
 
         JDBCController controller = new JDBCController();
+        controller.insertProjectMaterial(1,20,1);
+
+
 
 
     }

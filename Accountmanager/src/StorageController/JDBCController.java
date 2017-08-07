@@ -2,7 +2,6 @@ package StorageController;
 
 
 import java.sql.*;
-import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +26,7 @@ public class JDBCController {
     private static final String MILESTONE = "prg4.milestones";
     private static final String MESSAGE = "prg4.messages";
     private static final String PROJECT = "prg4.projects";
+    private static final String MATERIAL = "prg4.material";
 
 
     /**
@@ -553,19 +553,21 @@ public class JDBCController {
     }
 
     public ObservableList<Material> loadMaterial() {
-        ObservableList<Material> tmpListMaterial = null;
-        Material tmpMaterial = null;
+        ObservableList<Material> tmpListMaterial = FXCollections.observableArrayList();
 
         try {
 
             Statement stmt = JdbcStorageController().createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM milestone");
+            ResultSet rs = stmt.executeQuery(this.Select(MATERIAL));
 
 
-            while (rs.next()) {
+            while (rs.next())
+            {
+                Material tmpMaterial = new Material();
                 tmpMaterial.setMaterialID(rs.getInt("materialID"));
                 tmpMaterial.setMaterialName(rs.getString("materialName"));
                 tmpMaterial.setMaterialPrice(rs.getDouble("materialPrice"));
+                tmpListMaterial.addAll(tmpMaterial);
             }
 
             return tmpListMaterial;
@@ -657,7 +659,6 @@ public class JDBCController {
         return false;
     }
 
-
     public boolean updateMaterial(Integer _materialID, String materialName, Integer _materialPrice) throws ParseException {
         try {
             Statement stmt = JdbcStorageController().createStatement();
@@ -700,6 +701,54 @@ public class JDBCController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
+    }
+
+    // Specials MaterialInputProjects
+
+
+    public boolean insertProjectMaterial(Integer _projectID, Integer _materialAmount, Integer _materialID)
+    {
+        Integer tmpMaterialAmount = 0;
+        Integer tmpKeyProjectMaterial = 1;
+        Integer tmpProjectMaterial = 0;
+
+
+        try {
+
+            System.out.println("Start!");
+            Statement stmt = JdbcStorageController().createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM material WHERE materialID = '"+_materialID+"'");
+
+            if (rs.next() && rs.getInt("materialAmount")<_materialAmount)
+            {
+                System.out.println("Nicht genug Einheiten im Lager verfügbar.");
+                return false;
+            }
+            else
+            {
+                System.out.println("Waren werden hinzugefügt!");
+                tmpMaterialAmount = (rs.getInt("materialAmount")-_materialAmount);
+                stmt.execute("UPDATE material SET materialAmount = '"+tmpMaterialAmount+"' WHERE materialID = '"+_materialID+"'");
+
+                // Test hinzufügt
+                if ((rs = stmt.executeQuery("SELECT * FROM project_material WHERE materialID = '"+_materialID+"'")) != null)
+                {
+                    rs.next();
+                    System.out.println("ID gefunden!");
+                    tmpProjectMaterial = _materialAmount + (rs.getInt("materialAmount"));
+                    stmt.execute("UPDATE project_material SET materialAmount='" + tmpProjectMaterial+ "' WHERE materialID = '"+tmpKeyProjectMaterial+"'");
+
+                    return true;
+                }
+                // INSERT METHODE
+            }
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
