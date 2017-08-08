@@ -11,9 +11,7 @@ import java.util.List;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 
-/**
- * contains information like date, participated employees or milestones of a project
- **/
+/**contains information like date, participated employees or milestones of a project**/
 public class Project {
 
     //Variables
@@ -50,107 +48,67 @@ public class Project {
     }
 
     //Methods
-
-    /**
-     * get enddate of a project
-     **/
+    /**get enddate of a project**/
     public LocalDate getEndDate() {
         return end;
     }
-
     public String getEndDateString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return end.format(formatter).toString();
     }
-
-    /**
-     * get startdate of a project
-     **/
+    /**get startdate of a project**/
     public LocalDate getStartDate() {
         return start;
     }
-
     public String getStartDateString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return start.format(formatter).toString();
     }
-
-    /**
-     * set enddate of a project
-     **/
+    /**set enddate of a project**/
     public void setEndDate(LocalDate _newDeadLine) {
         end = _newDeadLine;
         projectCosts.setEndDate(_newDeadLine);
     }
-
-    /**
-     * get duration of a project
-     **/
+    /**get duration of a project**/
     public Period getActualProjectDuration() {
         return Period.between(LocalDate.now(), end);
     }
-
-    /**
-     * get Project ID
-     **/
+    /**get Project ID**/
     public Integer getProjectID() {
         return projectID;
     }
-
-    /**
-     * get projectname
-     **/
+    /**get projectname**/
     public String getName() {
         return projectName;
     }
-
-    /**
-     * get costs of a project
-     **/
-    public Cost getProjectCosts() {
+    /**get costs of a project**/
+    public Cost getProjectCosts()
+    {
         return projectCosts;
     }
-
-    /**
-     * set name of a project
-     **/
+    /**set name of a project**/
     public void setName(String _newName) {
         projectName = _newName;
     }
 
-    public void setID(Integer _id) {
-        projectID = _id;
-    }
+    public void setID(Integer _id){projectID = _id;}
 
-    public void setStart(LocalDate _start) {
-        start = _start;
-    }
+    public void setStart(LocalDate _start){start = _start;}
 
-    public void setEnd(LocalDate _end) {
-        end = _end;
-    }
+    public void setEnd(LocalDate _end){end = _end;}
+    /**get list of employees involved in a project**/
+    public List<Employee> getEmployees() { return employees;}
+    /**get list of milestones of a project**/
+    public List<Milestones> getMilestones() { return milestones;}
 
-    /**
-     * get list of employees involved in a project
-     **/
-    public List<Employee> getEmployees() {
-        return employees;
-    }
+      /** check at the start of the program all milestones of a project for appointments **/
+    public boolean checkAllMilestones()
+    {
 
-    /**
-     * get list of milestones of a project
-     **/
-    public List<Milestones> getMilestones() {
-        return milestones;
-    }
-
-    /**
-     * check at the start of the program all milestones of a project for appointments
-     **/
-    public boolean checkAllMilestones() {
-
-        for (Milestones _milestone : milestones) {
-            if (_milestone.getMilestoneDate().isEqual(LocalDate.now()) || _milestone.getMilestoneDate().minusDays(3).isAfter(LocalDate.now())) {
+        for(Milestones _milestone : milestones)
+        {
+            if(_milestone.getMilestoneDate().isEqual(LocalDate.now())||_milestone.getMilestoneDate().minusDays(3).isAfter(LocalDate.now()))
+            {
                 System.out.println("Terminhinweis!");
                 return true;
             }

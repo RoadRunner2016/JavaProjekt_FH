@@ -2,6 +2,7 @@ package StorageController;
 
 
 import java.sql.*;
+import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,15 +11,14 @@ import java.time.ZoneId;
 import java.util.*;
 import java.time.Instant;
 
+import EmpDatabase.EmpDatabase;
 import Project.Project;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import Employee.*;
 import Project.*;
 
-/**
- * mainclass to controll databasework
- **/
+/**mainclass to controll databasework**/
 public class JDBCController {
 
     private static final String PERSONNEL = "prg4.personnel";
@@ -28,15 +28,16 @@ public class JDBCController {
     private static final String PROJECT = "prg4.projects";
     private static final String MATERIAL = "prg4.material";
 
+    private static InternalEmp INTERNAL = null;
+    private static EmpDatabase EDB = new EmpDatabase();
+    private static final Project EMPTY_PRJ = new Project("kein Projekt",1900,1,1,3000,1,1);
 
-    /**
-     * connect to database
-     **/
+    public static InternalEmp getInternal(){return INTERNAL;}
+
+    /**connect to database**/
     static public Connection connection;
 
-    /**
-     * Select all data of an table from database
-     **/
+    /**Select all data of an table from database**/
     public String Select(String _FROM) {
         String preparedStatement = "";
 
@@ -46,9 +47,7 @@ public class JDBCController {
 
     }
 
-    /**
-     * Select all data of an table from database where the condition is true
-     **/
+    /**Select all data of an table from database where the condition is true**/
     public String Select(String FROM, String WHERE) {
         String preparedStatement = "";
 
@@ -57,9 +56,7 @@ public class JDBCController {
         return preparedStatement;
     }
 
-    /**
-     * Select all data of an table from database where the condition is true and the returned data is equal to condition
-     **/
+    /**Select all data of an table from database where the condition is true and the returned data is equal to condition**/
     public String Select(String FROM, String WHERE, String _EQUALS) {
         String preparedStatement = "";
 
@@ -68,12 +65,10 @@ public class JDBCController {
         return preparedStatement;
     }
 
-    /**
-     * method to return the connectionstatement to database
-     **/
+    /**method to return the connectionstatement to database**/
     public Connection JdbcStorageController() {
         try {
-            if (connection == null) {
+            if(connection == null) {
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/prg4", "root", "Blackjack");
             }
 
@@ -85,9 +80,11 @@ public class JDBCController {
         return connection;
     }
 
-    /**
-     * get loginname and password from login to compare them
-     **/
+    /**get loginname and password from login to compare them, if the Password is correct and the user exists
+     *  the INTERNAL variable is set to the employee who is logged in now
+     *  the ProjectController gets access to this Employee by using the getter
+     *  With this InternalEmp the ProjectController gets access to the internal program methods
+     * **/
     public boolean loadPassword(String _loginName, String _pw) {
         String tmpPassword = null;
         Instant timestamp = Instant.now();
@@ -95,9 +92,13 @@ public class JDBCController {
 
         try {
             Statement stmt = JdbcStorageController().createStatement();
-            ResultSet rs = stmt.executeQuery(this.Select(PERSONNEL, "personnelLoginName", _loginName));
-            if (rs.next()) {
-                if (rs.getString("personnelPassword").equals(_pw)) {
+            ResultSet rs = stmt.executeQuery(this.Select(PERSONNEL,"personnelLoginName",_loginName));
+            if(rs.next()) {
+                if(rs.getString("personnelPassword").equals(_pw)) {
+                    InternalEmp in = new InternalEmp(rs.getString("personnelFirstname"),rs.getString("personnelLastname"),rs.getString("personnelEmail"));
+                    in.setAccessLevel(rs.getInt("personnelAccessLevel"));
+                    in.setEmpID(rs.getInt("personnelID"));
+                    INTERNAL = in;
                     return true;
                 }
 
@@ -110,9 +111,7 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to get all projects from database as an observableList
-     **/
+    /**method to get all projects from database as an observableList**/
     public ObservableList<Project> loadProjects() {
         ObservableList<Project> oListProjects = FXCollections.observableArrayList();
         try {
@@ -121,7 +120,8 @@ public class JDBCController {
 
             Statement stmt = JdbcStorageController().createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM projects");
-            while (rs.next()) {
+            while (rs.next())
+            {
 
                 // Create the Projekt
                 java.sql.Date tmpDateStart = rs.getDate("projectStart");
@@ -130,7 +130,7 @@ public class JDBCController {
                 LocalDate tmpDBStart = LocalDate.parse(tmpDateStart.toString());
                 LocalDate tmpDBEnd = LocalDate.parse(tmpDateEnd.toString());
 
-                tmpProject = new Project(rs.getString("projectName"), tmpDBStart, tmpDBEnd);
+                tmpProject = new Project(rs.getString("projectName"),tmpDBStart,tmpDBEnd);
                 tmpProject.setID(rs.getInt("projectID"));
 
                 // Add Employee List to Projekt
@@ -144,9 +144,16 @@ public class JDBCController {
                 // Add Material to projekt
                 tmpProject.getProjectCosts().setMaterialCosts(this.mapLoadProjectMaterial(rs.getInt("projectID")));
 
+                // Add Milestones from DB to project
+                for (Milestones ms : this.loadMilestoneProjects(rs.getInt("projectID"))) {
+                    pers.addNewMilestone(tmpProject, ms);
+                    System.out.println(ms.getMilestoneID());
+                }
 
+                pers.AddProjectToDatabase(EDB,tmpProject);
                 oListProjects.addAll(tmpProject);
             }
+
             return oListProjects;
 
         } catch (SQLException e) {
@@ -158,13 +165,11 @@ public class JDBCController {
 
 
     public JDBCController() {
-        connection = null;
+        this.connection = null;
     }
 
-    /**
-     * List Employees für Projekt
-     **/
-    public ArrayList<ExternalEmp> loadEmployeeForProject(Integer _porjectID) {
+    /** loads the employees which are part of the chosen project **/
+    public ArrayList<ExternalEmp> loadEmployeeForProject(Integer _projectID) {
 
         ArrayList<ExternalEmp> tmpListEmployee = new ArrayList<ExternalEmp>();
         Employee tmpEmployee = null;
@@ -172,13 +177,14 @@ public class JDBCController {
         try {
 
             Statement stmt = JdbcStorageController().createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM " + EMPLOYEE + " WHERE employeeProject = '" + _porjectID + "'");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM "+EMPLOYEE+" WHERE employeeProject = '"+_projectID+"'");
 
-            while (rs.next()) {
-                tmpListEmployee.add(new ExternalEmp(rs.getString("employeesFirstName"), rs.getString("employeesLastName"), rs.getDouble("employeesSaleray"), rs.getInt("employeesID")));
+            while (rs.next())
+            {
+                tmpListEmployee.add(new ExternalEmp(rs.getString("employeesFirstName"),rs.getString("employeesLastName"),rs.getDouble("employeesSaleray"),rs.getInt("employeesID")));
             }
 
-            return tmpListEmployee;
+            return tmpListEmployee ;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -186,11 +192,8 @@ public class JDBCController {
 
         return null;
     }
-
-    /**
-     * List Employees ungleich Projekt
-     **/
-    public ArrayList<ExternalEmp> loadEmployeeNotProject(Integer _porjectID) {
+    /** fills and returns a list of employees which are not working on the project **/
+    public ArrayList<ExternalEmp> loadEmployeeNotProject(Integer _projectID) {
 
         ArrayList<ExternalEmp> tmpListEmployee = new ArrayList<ExternalEmp>();
         Employee tmpEmployee = null;
@@ -198,16 +201,17 @@ public class JDBCController {
         try {
 
             Statement stmt = JdbcStorageController().createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM employees e join projects p on e.employeeProject = p.projectID WHERE employeeProject != '" + _porjectID + "'");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM employees e left join projects p on e.employeeProject = p.projectID WHERE employeeProject != '"+_projectID+"'");
 
-            while (rs.next()) {
-                tmpListEmployee.add(new ExternalEmp(rs.getString("employeesFirstName"), rs.getString("employeesLastName"), rs.getDouble("employeesSaleray"), rs.getInt("employeesID")));
-                tmpListEmployee.get(tmpListEmployee.size() - 1).setProjekt(rs.getString("projectName"));
+            while (rs.next())
+            {
+                tmpListEmployee.add(new ExternalEmp(rs.getString("employeesFirstName"),rs.getString("employeesLastName"),rs.getDouble("employeesSaleray"),rs.getInt("employeesID")));
+                if(rs.getInt("projectID") > 0)
+                    tmpListEmployee.get(tmpListEmployee.size()-1).setProjekt(EDB.searchProjectByID(rs.getInt("projectID")));
+                else
+                    tmpListEmployee.get(tmpListEmployee.size()-1).setProjekt(EMPTY_PRJ);
             }
-            if (tmpListEmployee.isEmpty()) {
-                tmpListEmployee.add(new ExternalEmp("", ""));
-            }
-            return tmpListEmployee;
+            return tmpListEmployee ;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -215,11 +219,8 @@ public class JDBCController {
 
         return null;
     }
-
-    /**
-     * List allEmployees
-     **/
-    public ArrayList<Employee> loadAllEmployee(Integer _porjectID) {
+    /**List allEmployees**/
+    public ArrayList<Employee> loadAllEmployee(Integer _projectID) {
 
         ArrayList<Employee> tmpListEmployee = new ArrayList<Employee>();
         Employee tmpEmployee = null;
@@ -232,7 +233,7 @@ public class JDBCController {
                 tmpListEmployee.add(new ExternalEmp(rs.getString("employeeFirstName"), rs.getString("employeeLastName"), rs.getDouble("employeeSalery"), rs.getInt("employeeProject")));
             }
 
-            return tmpListEmployee;
+            return tmpListEmployee ;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -240,10 +241,7 @@ public class JDBCController {
 
         return null;
     }
-
-    /**
-     * Objekt Liste Milestones Arraylist
-     **/
+    /**Objekt Liste Milestones Arraylist**/
     public List<Milestones> loadAllMilestone() {
 
         List<Milestones> tmpListMilestones = null;
@@ -257,7 +255,8 @@ public class JDBCController {
             java.sql.Date tmpDate = null;
 
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 tmpMilestone.setMilestoneID(rs.getInt("milestoneID"));
                 tmpMilestone.setMilestoneProjectID(rs.getInt("projectID"));
                 tmpDate = (rs.getDate("milestoneDate"));
@@ -276,9 +275,7 @@ public class JDBCController {
         return null;
     }
 
-    /**
-     * Object List Milestones Arraylist
-     **/
+    /**Object List Milestones Arraylist**/
     public ArrayList<Milestones> loadMilestoneProjects(Integer _projectID) {
 
         ArrayList<Milestones> tmpListMilestones = null;
@@ -287,7 +284,7 @@ public class JDBCController {
         try {
 
             Statement stmt = JdbcStorageController().createStatement();
-            ResultSet rs = stmt.executeQuery(this.Select(MILESTONE, "projectID", _projectID.toString()));
+            ResultSet rs = stmt.executeQuery(this.Select(MILESTONE,"projectID",_projectID.toString()));
 
             java.sql.Date tmpDate = null;
 
@@ -295,7 +292,8 @@ public class JDBCController {
             tmpListMilestones = new ArrayList<Milestones>();
 
 
-            while (rs.next()) {
+            while (rs.next())
+            {
 
                 tmpDate = (rs.getDate("milestoneDate"));
                 tmpListMilestones.add(new Milestones(
@@ -317,11 +315,9 @@ public class JDBCController {
     }
 
 
-    /**
-     * SQL-Setter
-     **/
+    /** SQL-Setter **/
 
-    public boolean saveProjects(String _name, Integer _dayStart, Integer _monthStart, Integer _yearStart, Integer _dayEnd, Integer _monthEnd, Integer _yearEnd, String _admin) throws Exception {
+    public boolean saveProjects(String _name,Integer _dayStart,Integer _monthStart,Integer _yearStart,Integer _dayEnd,Integer _monthEnd,Integer _yearEnd,String _admin ) throws ParseException {
 
         String startDate = _yearStart + "-" + _monthStart + "-" + _dayStart;
         String endDate = _yearEnd + "-" + _monthEnd + "-" + _dayEnd;
@@ -339,10 +335,11 @@ public class JDBCController {
         Calendar calendar = Calendar.getInstance();
         java.util.Date currentTimestamp = new Timestamp(calendar.getTime().getTime());
 
-        try {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
 
-            String SQL = "INSERT INTO projects (projectName, projectStart, projectEnd, projectTimeStamp, projectAdmin) VALUES ('" + _name + "', '" + sqlDateStart + "','" + sqlDateEnd + "','" + currentTimestamp + "', '" + _admin + "')";
+            String SQL = "INSERT INTO projects (projectName, projectStart, projectEnd, projectTimeStamp, projectAdmin) VALUES ('"+_name+"', '"+sqlDateStart+"','"+sqlDateEnd+"','"+currentTimestamp+"', '"+_admin+"')";
             PreparedStatement psProjects = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psProjects.executeUpdate();
 
@@ -355,15 +352,16 @@ public class JDBCController {
     }
 
 
-    /**
-     * SQL-Insert into
-     **/
 
-    public boolean saveEmployees(String _firstName, String _lastName, Integer _salery, Integer _project) throws ParseException {
 
-        try {
+    /** SQL-Insert into **/
+
+    public boolean saveEmployees(String _firstName,String _lastName, Integer _salery, Integer _project ) throws ParseException {
+
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO projects (employeeFirstName, employeeLastName, employeeSalery, employeeProject) VALUES ('" + _firstName + "', '" + _lastName + "','" + _salery + "','" + _project + "')";
+            String SQL = "INSERT INTO projects (employeeFirstName, employeeLastName, employeeSalery, employeeProject) VALUES ('"+_firstName+"', '"+_lastName+"','"+_salery+"','"+_project+"')";
             PreparedStatement psEmployee = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psEmployee.executeUpdate();
             return true;
@@ -374,14 +372,13 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * Method to insert material into the database
-     **/
-    public boolean saveMaterial(String _materialName, Integer _materialPrice, Integer _materialAmount) throws SQLException {
+    /** Method to insert material into the database **/
+    public boolean saveMaterial(String _firstName,String _materialName, Integer _materialPrice) throws ParseException {
 
-        try {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO material (materialName, materialPrice, materialAmount) VALUES ('" + _materialName + "','" + _materialPrice + "','"+_materialAmount+"')";
+            String SQL = "INSERT INTO projects (materialName, materialPrice) VALUES ('"+_firstName+"', '"+_materialName+"','"+_materialPrice+"')";
             PreparedStatement psMaterial = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psMaterial.executeUpdate();
             return true;
@@ -392,10 +389,8 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to insert the Milestones into the database
-     **/
-    public boolean saveMileStone(Integer _projectID, String _milestoneYear, String _milestoneMonth, String _milestoneDay, String _milestoneDescription) throws ParseException {
+    /** method to insert the Milestones into the database **/
+    public boolean saveMileStone(Integer _projectID,String _milestoneYear ,String _milestoneMonth, String _milestoneDay, String _milestoneDescription) throws ParseException {
 
 
         String milestoneDate = _milestoneYear + "-" + _milestoneMonth + "-" + _milestoneDay;
@@ -405,9 +400,10 @@ public class JDBCController {
 
         java.sql.Date sqlMileStone = new java.sql.Date(dateStart.getTime());
 
-        try {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO projects (projectID, milestoneDate, milestoneDescription) VALUES ('" + _projectID + "', '" + sqlMileStone + "','" + _milestoneDescription + "')";
+            String SQL = "INSERT INTO projects (projectID, milestoneDate, milestoneDescription) VALUES ('"+ _projectID+"', '"+sqlMileStone+"','"+_milestoneDescription+"')";
             PreparedStatement psMaterial = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psMaterial.executeUpdate();
             return true;
@@ -418,10 +414,8 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to insert message into database
-     **/
-    public boolean saveMessage(Integer _projectID, String _messageText, String _messageWriter) throws ParseException {
+    /** method to insert message into database **/
+    public boolean saveMessage(Integer _projectID,String _messageText, String _messageWriter) throws ParseException {
 
 
         // EINTRAG in der Datenbank noch ändern! TYP!
@@ -429,9 +423,10 @@ public class JDBCController {
         Calendar calendar = Calendar.getInstance();
         java.util.Date currentTimestamp = new Timestamp(calendar.getTime().getTime());
 
-        try {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO projects (projectID, milestoneDate, milestoneDescription,) VALUES ('" + _projectID + "','" + currentTimestamp + "', '" + _messageText + "','" + _messageWriter + "')";
+            String SQL = "INSERT INTO projects (projectID, milestoneDate, milestoneDescription,) VALUES ('"+ _projectID+"','"+currentTimestamp+"', '"+_messageText+"','"+_messageWriter+"')";
             PreparedStatement psMessage = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psMessage.executeUpdate();
             return true;
@@ -442,39 +437,20 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to insert the projectmaterials into the database
-     **/
-    public boolean saveProjectMaterial(Integer _projectID, Integer _materialID, Integer _materialAmount) throws SQLException {
-
-
-        try {
-            Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO project_material (projectID, materialID, materialAmount) VALUES ('" + _projectID + "','" + _materialID + "', '" + _materialAmount + "')";
-            PreparedStatement psMaterial = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
-            psMaterial.executeUpdate();
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     /** SQL-Deleter **/
 
-    /**
-     * method to delete a project from database by projectid
-     **/
-    public boolean deleteProject(Integer _projectID) {
-        try {
+    /**method to delete a project from database by projectid**/
+    public boolean deleteProject(Integer _projectID)
+    {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String deleteImage = "DELETE FROM images " + "WHERE projectID = '" + _projectID + "'";
-            String deleteMilestones = "DELETE FROM milestone " + "WHERE projectID = '" + _projectID + "'";
-            String deleteProjectMaterial = "DELETE FROM project_material " + "WHERE projectID = '" + _projectID + "'";
-            String deleteMessage = "DELETE FROM message " + "WHERE projectID = '" + _projectID + "'";
-            String deleteEntryEmployee = "UPDATE employee" + "SET projectID = null" + " WHERE projectID = '" + _projectID + "'";
-            String deleteProject = "DELETE FROM project " + "WHERE projectID = '" + _projectID + "'";
+            String deleteImage = "DELETE FROM images " + "WHERE projectID = '"+_projectID+"'";
+            String deleteMilestones = "DELETE FROM milestone " + "WHERE projectID = '"+_projectID+"'";
+            String deleteProjectMaterial = "DELETE FROM project_material " + "WHERE projectID = '"+_projectID+"'";
+            String deleteMessage = "DELETE FROM message " + "WHERE projectID = '"+_projectID+"'";
+            String deleteEntryEmployee = "UPDATE employee" + "SET projectID = null" + " WHERE projectID = '"+_projectID+"'";
+            String deleteProject = "DELETE FROM project " + "WHERE projectID = '"+_projectID+"'";
 
 
             PreparedStatement psDelete = connection.prepareStatement(deleteImage);
@@ -498,15 +474,16 @@ public class JDBCController {
         return false;
 
 
+
     }
 
-    /**
-     * method to delete a employee from database by employeeid
-     **/
-    public boolean deleteEmployee(Integer _employeeID) {
-        try {
+    /** method to delete a employee from database by employeeid **/
+    public boolean deleteEmployee(Integer _employeeID)
+    {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String deleteEmployee = "DELETE FROM employee " + "WHERE employeeID = '" + _employeeID + "'";
+            String deleteEmployee = "DELETE FROM employee " + "WHERE employeeID = '"+_employeeID+"'";
 
             PreparedStatement psDeleteEmployee = connection.prepareStatement(deleteEmployee);
             psDeleteEmployee.executeUpdate();
@@ -518,13 +495,13 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to delete a image from database by imageid
-     **/
-    public boolean deleteImage(Integer _imagesID) {
-        try {
+    /** method to delete a image from database by imageid **/
+    public boolean deleteImage(Integer _imagesID)
+    {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String deleteImgages = "DELETE FROM images " + "WHERE imagesID = '" + _imagesID + "'";
+            String deleteImgages = "DELETE FROM images " + "WHERE imagesID = '"+_imagesID+"'";
             PreparedStatement psDeleteImages = connection.prepareStatement(deleteImgages);
             psDeleteImages.executeUpdate();
             return true;
@@ -535,13 +512,13 @@ public class JDBCController {
         return false;
     }
 
-    /**
-     * method to delete a milestone from database by milestoneid
-     **/
-    public boolean deleteMileStone(Integer _milestoneID) {
-        try {
+    /**method to delete a milestone from database by milestoneid**/
+    public boolean deleteMileStone(Integer _milestoneID)
+    {
+        try
+        {
             Statement stmt = JdbcStorageController().createStatement();
-            String deleteMilestone = "DELETE FROM milestone " + "WHERE milestoneID = '" + _milestoneID + "'";
+            String deleteMilestone = "DELETE FROM milestone " + "WHERE milestoneID = '"+_milestoneID+"'";
             PreparedStatement psDeleteMilestone = connection.prepareStatement(deleteMilestone);
             psDeleteMilestone.executeUpdate();
             return true;
@@ -552,7 +529,9 @@ public class JDBCController {
         return false;
     }
 
-    public ObservableList<Material> loadMaterial() {
+    /** load all materials from Database into an observable List **/
+    public ObservableList<Material>loadMaterial()
+    {
         ObservableList<Material> tmpListMaterial = FXCollections.observableArrayList();
 
         try {
@@ -561,7 +540,8 @@ public class JDBCController {
             ResultSet rs = stmt.executeQuery(this.Select(MATERIAL));
 
 
-            while (rs.next()) {
+            while (rs.next())
+            {
                 Material tmpMaterial = new Material();
                 tmpMaterial.setMaterialID(rs.getInt("materialID"));
                 tmpMaterial.setMaterialName(rs.getString("materialName"));
@@ -628,6 +608,7 @@ public class JDBCController {
             psProjects.executeUpdate();
 
             stmt.close();
+            ;
             psProjects.close();
             return true;
 
@@ -637,26 +618,27 @@ public class JDBCController {
         return false;
     }
 
-    public boolean updateEmployee(String firstName, String lastName, Integer salery, Integer project) throws ParseException {
+    public boolean updateEmployee(String firstName, String lastName, double salery, Integer project, Employee emp) throws ParseException {
 
 
         try {
             Statement stmt = JdbcStorageController().createStatement();
 
-            String SQL = "UPDATE employee SET employeeFirtName ='" + firstName + "', employeeLastName='" + lastName + "', employeeSalery='" + salery + "',employeeProject='" + project + "'";
-            PreparedStatement psEmployee = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
-            psEmployee.executeUpdate();
+        String SQL = "UPDATE employees SET employeesFirstName ='" + firstName + "', employeesLastName='" + lastName + "', employeesSaleray='" + salery + "',employeeProject='" + project + "' WHERE employeesID = " + emp.getEmpID() ;
+        PreparedStatement psEmployee = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
+        psEmployee.executeUpdate();
 
-            stmt.close();
+        stmt.close();
 
-            psEmployee.close();
-            return true;
+        psEmployee.close();
+        return true;
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
         return false;
     }
+
 
     public boolean updateMaterial(Integer _materialID, String materialName, Integer _materialPrice) throws ParseException {
         try {
@@ -667,6 +649,7 @@ public class JDBCController {
             psEmployee.executeUpdate();
 
             stmt.close();
+            ;
             psEmployee.close();
             return true;
 
@@ -675,7 +658,6 @@ public class JDBCController {
         }
         return false;
     }
-
     public boolean updateMilestones(Integer _projectID, Integer _milestoneID, String _milestoneYear, String _milestoneMonth, String _milestoneDay, String _milestoneDescription) throws ParseException {
         try {
 
@@ -703,11 +685,9 @@ public class JDBCController {
         return false;
     }
 
-    // Specials MaterialInputProjects
-
-
     public boolean insertProjectMaterial(Integer _projectID, Integer _materialAmount, Integer _materialID) {
         Integer tmpMaterialAmount = 0;
+        Integer tmpKeyProjectMaterial = 1;
         Integer tmpProjectMaterial = 0;
 
 
@@ -725,15 +705,14 @@ public class JDBCController {
                 stmt.execute("UPDATE material SET materialAmount = '" + tmpMaterialAmount + "' WHERE materialID = '" + _materialID + "'");
                 rs = stmt.executeQuery("SELECT * FROM project_material WHERE materialID = '" + _materialID + "'");
 
-                if (!rs.first())
-                {
+                if (!rs.first()) {
                     saveProjectMaterial(_projectID, _materialID, _materialAmount);
                     return true;
 
                 } else {
 
                     tmpProjectMaterial = _materialAmount + (rs.getInt("materialAmount"));
-                    stmt.execute("UPDATE project_material SET materialAmount='" + tmpProjectMaterial + "' WHERE materialID = '" + "'  AND projectID = '" + _projectID + "'");
+                    stmt.execute("UPDATE project_material SET materialAmount='" + tmpProjectMaterial + "' WHERE materialID = '" + tmpKeyProjectMaterial + "'  AND projectID = '" + _projectID + "'");
                     return true;
                 }
 
@@ -744,8 +723,21 @@ public class JDBCController {
 
             return false;
         }
+    }
+    public boolean saveProjectMaterial(Integer projectID, Integer materialID, Integer _materialAmount) throws SQLException {
 
 
+        try {
+            Statement stmt = JdbcStorageController().createStatement();
+            String SQL = "INSERT INTO project_material (projectID, materialID, materialAmount) VALUES ('" + projectID + "','" + materialID + "', '" + _materialAmount + "')";
+            PreparedStatement psMaterial = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
+            psMaterial.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean removeProjectMaterial(Integer _projectID, Integer _materialAmount, Integer _materialID){
@@ -795,6 +787,9 @@ public class JDBCController {
 
     }
 
-}
 
+
+
+
+}
 

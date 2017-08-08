@@ -6,16 +6,28 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.event.ActionEvent;
 
+import javax.sql.RowSet;
+import java.awt.*;
 import java.sql.Array;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -29,6 +41,11 @@ public class ProjectController {
 
     public ProjectController() {
     }
+
+    private static final int FONTSIZE = 16;
+    private static ObservableList<Project> PROJECTS = null;
+    private static Project PROJECT = null;
+    private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("#,###.00");
 
     // Tab Pane Projects
 
@@ -102,6 +119,11 @@ public class ProjectController {
     @FXML
     private Label materialCosts;
 
+    // Tab Pane Milstones
+
+    @FXML
+    private GridPane milestonesGridPane;
+
 
     @FXML
     private TableColumn<String, String> msg;
@@ -110,6 +132,102 @@ public class ProjectController {
 
     @FXML
     private GridPane messageGridPane;
+
+    @FXML
+    private void openWindowNewMaterial() {
+        AddToDBController.openWindowNewMaterial("Neues Material hinzufügen");
+    }
+
+    @FXML
+    private void openWindowNewEmployee() {
+        AddToDBController.openWindowNewEmployee("Neuen Mitarbeiter hinzufügen");
+    }
+
+    @FXML
+    private void openWindowNewProject() {
+        AddToDBController.openWindowNewProject("Neues Projekt hinzufügen");
+    }
+
+    @FXML
+    private void employeeAddToProj() {
+        System.out.println("add Employee to project");
+        if (PROJECT != null) {
+            ExternalEmp e = (ExternalEmp) JDBCController.getInternal().searchEmployeeByID(((ExternalEmp) staffAll.getSelectionModel().selectedItemProperty().get()).getProject(),staffAll.getSelectionModel().selectedItemProperty().get().getEmpID());
+            System.out.println("project != null");
+            if (e != null) {
+                System.out.println("emp != null");
+                JDBCController jdbc = new JDBCController();
+                try {
+                    System.out.println("In der Methode: " + PROJECT + "---" + e.getProject());
+
+                    JDBCController.getInternal().RemovePersonelFromProject(e, e.getProject());
+                    JDBCController.getInternal().AddPersonelToProject(e, PROJECT);
+                    jdbc.updateEmployee(e.getFirstName(), e.getLastName(), e.getSalary(), PROJECT.getProjectID(), e);
+
+                    ObservableList<Employee> oEmp = FXCollections.observableArrayList(PROJECT.getEmployees());
+                    staffInvolved.setItems(oEmp);
+
+                    oEmp = FXCollections.observableArrayList(jdbc.loadEmployeeNotProject(PROJECT.getProjectID()));
+                    staffAll.setItems(oEmp);
+
+                } catch (ParseException exc) {
+                    exc.printStackTrace();
+                }
+            }
+            else
+            {
+                e = (ExternalEmp) staffAll.getSelectionModel().selectedItemProperty().get();
+                JDBCController jdbc = new JDBCController();
+                try {
+                    System.out.println("In der Methode: " + PROJECT + "---" + e.getProject());
+
+                    JDBCController.getInternal().RemovePersonelFromProject(e, e.getProject());
+                    JDBCController.getInternal().AddPersonelToProject(e, PROJECT);
+                    jdbc.updateEmployee(e.getFirstName(), e.getLastName(), e.getSalary(), PROJECT.getProjectID(), e);
+
+                    ObservableList<Employee> oEmp = FXCollections.observableArrayList(PROJECT.getEmployees());
+                    staffInvolved.setItems(oEmp);
+
+                    oEmp = FXCollections.observableArrayList(jdbc.loadEmployeeNotProject(PROJECT.getProjectID()));
+                    staffAll.setItems(oEmp);
+
+                } catch (ParseException exc) {
+                    exc.printStackTrace();
+                }
+            }
+
+            insertEmployeeCosts(PROJECT);
+        }
+    }
+
+    @FXML
+    private void employeeRemoveFromProj() {
+        if (PROJECT != null) {
+            ExternalEmp e = (ExternalEmp) staffInvolved.getSelectionModel().selectedItemProperty().get();
+            System.out.println("erste klammer");
+            if (e != null) {
+                System.out.println("zweite klammer");
+
+                JDBCController jdbc = new JDBCController();
+                try {
+                    System.out.println("In der try methode zeuch: " + PROJECT.getEmployees().toString());
+
+                    JDBCController.getInternal().RemovePersonelFromProject(e, PROJECT);
+                    jdbc.updateEmployee(e.getFirstName(), e.getLastName(), e.getSalary(), 0, e);
+
+                    ObservableList<Employee> oEmp = FXCollections.observableArrayList(PROJECT.getEmployees());
+                    staffInvolved.setItems(oEmp);
+
+                    oEmp = FXCollections.observableArrayList(jdbc.loadEmployeeNotProject(PROJECT.getProjectID()));
+                    staffAll.setItems(oEmp);
+
+                } catch (ParseException exc) {
+                    exc.printStackTrace();
+                }
+            }
+            insertEmployeeCosts(PROJECT);
+        }
+    }
 
 
     @FXML
@@ -130,7 +248,7 @@ public class ProjectController {
         staffAllLastname.setCellValueFactory(
                 new PropertyValueFactory<Employee, String>("LastName"));
         staffAllProject.setCellValueFactory(
-                new PropertyValueFactory<Employee, String>("Project"));
+                new PropertyValueFactory<Employee, String>("ProjectName"));
 
         staffInvolvedFirstname.setCellValueFactory(
                 new PropertyValueFactory<Employee, String>("FirstName"));
@@ -147,14 +265,18 @@ public class ProjectController {
                 new PropertyValueFactory<Material, String>("MaterialPrice"));
 
         materialAllName.setCellValueFactory(
-                new PropertyValueFactory<Material, String>("FirstName"));
+                new PropertyValueFactory<Material, String>("MaterialName"));
         materialAllPrice.setCellValueFactory(
-                new PropertyValueFactory<Material, String>("EmpID"));
+                new PropertyValueFactory<Material, String>("MaterialPrice"));
 
-        messageGridPane.setStyle("-fx-background-color: white; -fx-text-alignment: top;");
+        messageGridPane.setStyle("-fx-background-color: white;");
+        messageGridPane.getRowConstraints().clear();
+        milestonesGridPane.setStyle("-fx-background-color: white;");
+        milestonesGridPane.getRowConstraints().clear();
+
 
         /** Dummy Implementation of the Messaging System **/
-        int FONTSIZE = 16;
+
         int xyz = 10;
         Label[] g = new Label[xyz];
         TextArea[] t = new TextArea[xyz];
@@ -189,20 +311,26 @@ public class ProjectController {
 
                     public void changed(ObservableValue<? extends Project> observable, Project oldValue, Project newValue) {
                         insertOverviewDetails(newValue);
+                        insertMilestones(newValue);
+                        PROJECT = newValue;
                     }
-                }
-        );
+                });
+
 
     }
 
     public void insertProjects(ObservableList<Project> _projectList) {
+        PROJECTS = _projectList;
         projects.setItems(_projectList);
     }
 
-    public void insertOverviewDetails(Project _p) {
+    public void insertMaterials(ObservableList<Material> _materialList) {
+        materialAll.setItems(_materialList);
+    }
+
+    private void insertOverviewDetails(Project _p) {
 
         if (_p != null) {
-            DecimalFormat formatter = new DecimalFormat("#,###.00");
 
             JDBCController jdbc = new JDBCController();
 
@@ -221,7 +349,7 @@ public class ProjectController {
             Double costs = (_p.getProjectCosts().getCalculatedMaterialCosts() + _p.getProjectCosts().getCalculatedStaffCosts());
 
 
-            overviewCosts.setText(formatter.format(costs) + " €");
+            overviewCosts.setText(MONEY_FORMAT.format(costs) + " €");
 
             overviewStartEnd.setText(_p.getStartDateString() + " - " + _p.getEndDateString());
 
@@ -235,6 +363,9 @@ public class ProjectController {
 
             for (Map.Entry<Material, Integer> mat : _p.getProjectCosts().getMaterialCosts().entrySet()) {
                 materialString += mat.getKey().getMaterialName() + " -- " + mat.getValue().toString() + " x " + mat.getKey().getMaterialPrice() + "\n";
+
+                /** Add the material which is needed for the project **/
+
                 mat.getKey().setMaterialAmount(mat.getValue());
                 materials.addAll(mat.getKey());
             }
@@ -249,21 +380,116 @@ public class ProjectController {
             oEmp = FXCollections.observableArrayList(jdbc.loadEmployeeNotProject(_p.getProjectID()));
             staffAll.setItems(oEmp);
 
-            // staff costs per day
-            Double staffCosts = _p.getProjectCosts().getCalculatedStaffCosts() / ChronoUnit.DAYS.between(_p.getStartDate(), _p.getEndDate());
-            employeeCosts0.setText(formatter.format(staffCosts) + " €");
-
-            //staff costs for the whole projekt time period
-            staffCosts = _p.getProjectCosts().getCalculatedStaffCosts();
-            employeeCosts1.setText(formatter.format(staffCosts) + " €");
+            /** Calculating and inserting staff costs per day  **/
+            insertEmployeeCosts(_p);
 
             /** Set the Tables of the Material Tab Pane **/
 
+            /** Insert used material into table **/
             materialUsed.setItems(materials);
+
+            /** Insert costs for used material **/
+            costs = _p.getProjectCosts().getCalculatedMaterialCosts();
+            materialCosts.setText(MONEY_FORMAT.format(costs) + " €");
 
 
         }
     }
 
+    /**
+     * Change the Milestones to the Project milestones by creating textareas which r displaying the date and description
+     **/
+    private void insertMilestones(Project _p) {
+
+        milestonesGridPane.getChildren().clear();
+
+        int i = 0;
+        for (Milestones m : _p.getMilestones()) {
+
+
+            /** creating description fields **/
+            TextArea t = new TextArea();
+            t.getPrefColumnCount();
+            t.setMinHeight(FONTSIZE * t.getPrefRowCount());
+            t.prefWidth(Double.MAX_VALUE);
+            t.setWrapText(true);
+            t.setEditable(false);
+            t.setStyle("-fx-font-size: " + FONTSIZE + "; -fx-text-fill: black;");
+            t.setText(m.getMilestoneName()
+                    + " -- "
+                    + m.getMilestoneDate()
+                    + "\n"
+                    + m.getMilestoneInfo()
+            );
+
+            milestonesGridPane.add(t, 0, i);
+
+
+            /**  creating change buttons for any milestone, anchorpane used as background and cell borders**/
+
+            AnchorPane a = new AnchorPane();
+            a.setStyle("-fx-border-color: lightgrey; -fx-border-width: 1;");
+
+            Button btn = new Button();
+            btn.setText("Ändern");
+            btn.setTranslateY(10);
+
+            milestonesGridPane.add(a, 1, i);
+            milestonesGridPane.add(btn, 1, i);
+
+            GridPane.setValignment(btn, VPos.TOP);
+            GridPane.setHalignment(btn, HPos.CENTER);
+
+            i++;
+        }
+    }
+
+    /**
+     * Change the Milestones to the Project milestones by creating textareas which r displaying the date and description
+     **/
+    private void insertMessages(Project _p) {
+        milestonesGridPane.getRowConstraints().clear();
+        int i = 0;
+        for (Milestones m : _p.getMilestones()) {
+
+            /** creating description fields **/
+            TextArea t = new TextArea();
+            t.getPrefColumnCount();
+            t.setMinHeight(FONTSIZE * t.getPrefRowCount());
+            t.prefWidth(Double.MAX_VALUE);
+            t.setWrapText(true);
+            t.setEditable(false);
+            t.setStyle("-fx-font-size: " + FONTSIZE + "; -fx-text-fill: black;");
+            t.setText(m.getMilestoneName()
+                    + " -- "
+                    + m.getMilestoneDate()
+                    + "\n"
+                    + m.getMilestoneInfo()
+            );
+            RowConstraints rc = new RowConstraints();
+
+            milestonesGridPane.add(t, 0, i);
+
+            /**  creating change buttons for any milestone  **/
+            Button btn = new Button();
+            btn.setText("Ändern");
+            btn.setTranslateY(10);
+            milestonesGridPane.add(btn, 1, i);
+            GridPane.setValignment(btn, VPos.TOP);
+            GridPane.setHalignment(btn, HPos.CENTER);
+
+            i++;
+        }
+    }
+
+    private void insertEmployeeCosts(Project _p){
+        /** Calculating and inserting staff costs per day  **/
+        Double staffCosts = _p.getProjectCosts().getCalculatedStaffCosts() / ChronoUnit.DAYS.between(_p.getStartDate(), _p.getEndDate());
+        employeeCosts0.setText(MONEY_FORMAT.format(staffCosts) + " €");
+
+        /** staff costs for the whole projekt time period **/
+        staffCosts = _p.getProjectCosts().getCalculatedStaffCosts();
+        employeeCosts1.setText(MONEY_FORMAT.format(staffCosts) + " €");
+    }
 
 }

@@ -34,12 +34,14 @@ public class Login {
 
         InternalEmp tmpInternalEmpTmp = new InternalEmp();
 
-        while (_trails != 0) {
+        while (_trails != 0)
+        {
             System.out.println(" Anmeldebildschirm ");
 
             _checkTMP = checkPassword(_tmpDatabase, tmpInternalEmpTmp.searchEmployee(_tmpDatabase, _tmpName), _tmpPassword);
 
-            if (_checkTMP == true) {
+            if (_checkTMP == true)
+            {
 
                 System.out.println("Anmeldung war erfolgreich");
                 return true;

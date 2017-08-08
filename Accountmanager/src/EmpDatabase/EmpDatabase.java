@@ -10,59 +10,48 @@ import java.util.ArrayList;
 /**
  * Created by A on 06.02.2017.
  */
-
-/**
- * Database with lists of information about all employees and projects
- **/
+/**Database with lists of information about all employees and projects**/
 public class EmpDatabase {
     private List<Employee> tmpEdatabase = new ArrayList<Employee>();
     private List<Project> tmpProjects = new ArrayList<Project>();
 
-    /**
-     * delete all lists
-     **/
-    public void removeAll() {
+    /**delete all lists**/
+    public void removeAll()
+    {
         tmpEdatabase.clear();
         tmpProjects.clear();
     }
-
-    /**
-     * add a project to the database
-     **/
-    public boolean AddProjToDatabase(Project _proj) {
+    /**add a project to the database**/
+    public boolean AddProjToDatabase(Project _proj)
+    {
         return tmpProjects.add(_proj);
     }
 
-    /**
-     * get the list of projects
-     **/
-    public List getAllProj() {
+    /** get the list of projects **/
+    public List getAllProj()
+    {
         return tmpProjects;
     }
-
-    /**
-     * get the list of employess
-     **/
-    public List getAllEmpl() {
+    /** get the list of employess **/
+    public List getAllEmpl()
+    {
         return tmpEdatabase;
     }
-
-    /**
-     * get amount of projects
-     **/
-    public int getNumberOfProjects() {
+    /** get amount of projects **/
+    public int getNumberOfProjects()
+    {
         return tmpProjects.size();
     }
-
-    /**
-     * search for an employee by ID
-     **/
-    public Employee searchEmployeeByID(int _givenID) {
+    /** search for an employee by ID **/
+    public Employee searchEmployeeByID(int _givenID)
+    {
         Iterator<Employee> actualEmployee = this.tmpEdatabase.iterator();
 
         int id = _givenID + Employee.getStartId();
+        id = _givenID;
 
-        while (actualEmployee.hasNext()) {
+        while (actualEmployee.hasNext())
+        {
             Employee e = actualEmployee.next();
             if (e.getEmpID() == id) {
                 return e;
@@ -73,16 +62,15 @@ public class EmpDatabase {
 
 
     }
-
-    /**
-     * search for a project by name
-     **/
-    public Project searchProjectByName(String _givenName) {
+    /** search for a project by name  **/
+    public Project searchProjectByID(int _ID)
+    {
         Iterator<Project> actualProject = this.tmpProjects.iterator();
 
-        while (actualProject.hasNext()) {
+        while (actualProject.hasNext())
+        {
             Project p = actualProject.next();
-            if (p.getName() == _givenName) {
+            if (p.getProjectID() == _ID) {
                 return p;
             }
         }

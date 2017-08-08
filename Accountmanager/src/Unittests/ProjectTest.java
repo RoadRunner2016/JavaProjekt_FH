@@ -6,12 +6,11 @@ import Employee.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 /**
  * Created by Ben on 02.01.2017.
  */
 
-public class ProjectTest {
+public class  ProjectTest {
 
 
     private Project testProject;
@@ -19,8 +18,9 @@ public class ProjectTest {
     private ExternalEmp testEEmp2;
 
     @Before
-    public void setUp() {
-        testProject = new Project("asd", 2017, 1, 1, 2017, 1, 31);
+    public void setUp()
+    {
+        testProject = new Project("asd",2017,1,1,2017,1,31);
         testEEmp = new ExternalEmp("Max", "Mustermann");
         testEEmp2 = new ExternalEmp("Max", "Mustermann");
         testEEmp.setSalary(1500);

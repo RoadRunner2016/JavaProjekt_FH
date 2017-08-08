@@ -39,15 +39,12 @@ import GUI.LoginWindow;
  * Created by Ben on 26.04.2017.
  */
 
-/**
- * mainclass for LoginWindow
- **/
+/**mainclass for LoginWindow**/
 public class LoginWindow {
 
-    /**
-     * method to open the LoginWindow
-     **/
-    public void start(Stage loginScreen) throws Exception {
+    /**method to open the LoginWindow**/
+    public void start(Stage loginScreen)throws Exception
+    {
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -69,6 +66,7 @@ public class LoginWindow {
         //LOGIN textfield
 
         TextField userTextField = new TextField();
+        userTextField.setText("rainer123");
         grid.add(userTextField, 1, 1);
 
         Label pw = new Label("Password:");
@@ -77,7 +75,9 @@ public class LoginWindow {
         //Password textfield
 
         PasswordField pwBox = new PasswordField();
+        pwBox.setText("rainer123");
         grid.add(pwBox, 1, 2);
+
 
 
         Button btn = new Button("Anmelden");
@@ -94,39 +94,43 @@ public class LoginWindow {
 
         btn.setOnAction
 
-                (new EventHandler<ActionEvent>() {
+                (new EventHandler<ActionEvent>()
+                {
 
-                    public void handle(ActionEvent e) {
+                    public void handle(ActionEvent e)
+                    {
                         actiontarget.setText("");
 
-                        //usertextfield
-                        //pwbox
+                //usertextfield
+                //pwbox
 
-                        String tmpPassword = null;
+                String tmpPassword = null;
 
-                        JDBCController jdbc = new JDBCController();
+                JDBCController jdbc = new JDBCController();
 
-                        actiontarget.setFill(Color.FIREBRICK);
+                actiontarget.setFill(Color.FIREBRICK);
 
-                        if (jdbc.loadPassword(userTextField.getText(), pwBox.getText())) {
-                            // open the mainwindow
-                            actiontarget.setText("Login erfolgreich!");
-                            loginScreen.close();
-                            MainWindow mw = new MainWindow();
+                if (jdbc.loadPassword(userTextField.getText(), pwBox.getText())) {
+                    // open the mainwindow
+                    actiontarget.setText("Login erfolgreich!");
+                    loginScreen.close();
+                    MainWindow mw = new MainWindow();
 
-                            Stage mainwindow = new Stage();
-                            try {
-                                mw.start(mainwindow);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-
-                        } else {
-
-                            actiontarget.setText("Login fehlgeschlagen");
-                        }
+                    Stage mainwindow = new Stage();
+                    try {
+                        mw.start(mainwindow);
+                    } catch (Exception ex)
+                    {
+                        ex.printStackTrace();
                     }
-                });
+
+                } else {
+
+                    actiontarget.setText("Login fehlgeschlagen");
+                }
+            }
+        });
+
 
 
     }
