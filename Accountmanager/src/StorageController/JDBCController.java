@@ -373,12 +373,12 @@ public class JDBCController {
     }
 
     /** Method to insert material into the database **/
-    public boolean saveMaterial(String _firstName,String _materialName, Integer _materialPrice) throws ParseException {
+    public boolean saveMaterial(String _materialName, Double _materialPrice) throws ParseException {
 
         try
         {
             Statement stmt = JdbcStorageController().createStatement();
-            String SQL = "INSERT INTO projects (materialName, materialPrice) VALUES ('"+_firstName+"', '"+_materialName+"','"+_materialPrice+"')";
+            String SQL = "INSERT INTO material (materialName, materialPrice) VALUES ('"+_materialName+"','"+_materialPrice+"')";
             PreparedStatement psMaterial = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             psMaterial.executeUpdate();
             return true;
@@ -617,7 +617,6 @@ public class JDBCController {
         }
         return false;
     }
-
     public boolean updateEmployee(String firstName, String lastName, double salery, Integer project, Employee emp) throws ParseException {
 
 
@@ -638,8 +637,6 @@ public class JDBCController {
     }
         return false;
     }
-
-
     public boolean updateMaterial(Integer _materialID, String materialName, Integer _materialPrice) throws ParseException {
         try {
             Statement stmt = JdbcStorageController().createStatement();
@@ -684,7 +681,6 @@ public class JDBCController {
         }
         return false;
     }
-
     public boolean insertProjectMaterial(Integer _projectID, Integer _materialAmount, Integer _materialID) {
         Integer tmpMaterialAmount = 0;
         Integer tmpKeyProjectMaterial = 1;
@@ -739,7 +735,6 @@ public class JDBCController {
         }
         return false;
     }
-
     public boolean removeProjectMaterial(Integer _projectID, Integer _materialAmount, Integer _materialID){
 
         Integer tmpMaterialAmount = 0;
@@ -785,6 +780,26 @@ public class JDBCController {
 
 
 
+    }
+
+    public boolean checkMaterialName(String _materialName)
+    {
+
+        try {
+
+            Statement stmt = JdbcStorageController().createStatement();
+            ResultSet rs = stmt.executeQuery("Select materialName From prg4.material WHERE materialName = '" + _materialName + "'");
+
+            if (rs.first() == true)
+            {
+                return true;
+            }
+        }
+            catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 
